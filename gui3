@@ -33,11 +33,11 @@ pickle.dump(knn_regressor, open('KNN_model.pkl', 'wb'))
 
 class MainPage(tk.Frame):
     def __init__(self, master, app):
-        super().__init__(master, bg='lightblue') 
+        super().__init__(master)
         self.app = app
-        label = ttk.Label(self, text="Welcome to Price Predictor")
+        label = ttk.Label(self, text="Welcome to Price Predictor", font=('Helvetica', 20))
         label.pack(pady=20)
-        predict_button = ttk.Button(self, text="Predict Price", command=self.navigate_to_input_page)
+        predict_button = ttk.Button(self, text="Predict Price", command=self.navigate_to_input_page, style='C.TButton')
         predict_button.pack(pady=10)
 
     def navigate_to_input_page(self):
@@ -46,30 +46,33 @@ class MainPage(tk.Frame):
 
 class InputPage(tk.Frame):
     def __init__(self, master, app):
-        super().__init__(master, bg='lightgreen')
+        super().__init__(master)
         self.app = app
         label_frame = ttk.LabelFrame(self, text="Enter Property Details")
         label_frame.grid(row=0, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
-
-        # Set column weight to make them expand
-        label_frame.columnconfigure(0, weight=1)
-        label_frame.columnconfigure(1, weight=1)
 
         self.labels = ['Property Type:', 'Location:', 'City:', 'Baths:', 'Purpose:', 'Bedrooms:', 'Area in Marla:']
         self.entries = []
 
         for i, label_text in enumerate(self.labels):
-            label = ttk.Label(label_frame, text=label_text)
+            label = ttk.Label(label_frame, text=label_text, font=('Helvetica', 12))
             label.grid(row=i, column=0, padx=10, pady=10, sticky="e")
 
-            entry = ttk.Entry(label_frame)
-            entry.grid(row=i, column=1, padx=10, pady=10, sticky="w")
-            self.entries.append(entry)
+            # Add a drop-down option for the "Property Type" field
+            if label_text == 'Property Type:':
+                property_type_values = ['Flat', 'House', 'Penthouse']
+                property_type_combobox = ttk.Combobox(label_frame, values=property_type_values, font=('Helvetica', 12))
+                property_type_combobox.grid(row=i, column=1, padx=10, pady=10, sticky="w")
+                self.entries.append(property_type_combobox)
+            else:
+                entry = ttk.Entry(label_frame, font=('Helvetica', 12))
+                entry.grid(row=i, column=1, padx=10, pady=10, sticky="w")
+                self.entries.append(entry)
 
-        predict_button = ttk.Button(self, text="Predict Price", command=self.predict_price)
+        predict_button = ttk.Button(self, text="Predict Price", command=self.predict_price, style='C.TButton')
         predict_button.grid(row=1, column=0, columnspan=2, pady=10)
 
-        back_button = ttk.Button(self, text="Back to Main Page", command=self.navigate_to_main_page)
+        back_button = ttk.Button(self, text="Back to Main Page", command=self.navigate_to_main_page, style='C.TButton')
         back_button.grid(row=2, column=0, columnspan=2, pady=10)
 
     def predict_price(self):
@@ -79,10 +82,10 @@ class InputPage(tk.Frame):
                                                 'Area_in_Marla'])
             user_input_transformed = ct.transform(user_input)
             predicted_price = knn_regressor.predict(user_input_transformed)
-            result_label = ttk.Label(self, text=f'Predicted Price: {predicted_price[0]:.2f}')
+            result_label = ttk.Label(self, text=f'Predicted Price: {predicted_price[0]:.2f}', font=('Helvetica', 12))
             result_label.grid(row=3, column=0, columnspan=2, pady=10)
         except Exception as e:
-            result_label = ttk.Label(self, text=f'Error: {str(e)}')
+            result_label = ttk.Label(self, text=f'Error: {str(e)}', font=('Helvetica', 12))
             result_label.grid(row=3, column=0, columnspan=2, pady=10)
 
     def navigate_to_main_page(self):
@@ -99,6 +102,9 @@ class PricePredictorApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.title("Price Predictor")  # Set the title for the main application window
+
+        style = ttk.Style()
+        style.configure('C.TButton', font=('Helvetica', 12))
 
         self.frames = {}
         for F in (MainPage, InputPage):
